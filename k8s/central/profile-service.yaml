@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
+    cloud.google.com/neg-status: '{"network_endpoint_groups":{"80":"k8s1-92107bf1-default-profile-service-80-35654ff2"},"zones":["us-central1-a","us-central1-b","us-central1-f"]}'
+  creationTimestamp: "2026-04-29T21:51:02Z"
+  labels:
+    app: profile-service
+    app.kubernetes.io/managed-by: cloud-console
+  name: profile-service
+  namespace: default
+  resourceVersion: "1777776432171375009"
+  uid: 10f650e6-ca6a-4961-a012-28ac38d28397
+spec:
+  clusterIP: 34.118.225.77
+  clusterIPs:
+  - 34.118.225.77
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: profile-service
+    app.kubernetes.io/managed-by: cloud-console
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

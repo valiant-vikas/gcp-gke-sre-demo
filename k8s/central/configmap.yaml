@@ -1,0 +1,55 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    ca.crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIELDCCApSgAwIBAgIQRg8aO9bNSRZZFYWr1aBqmzANBgkqhkiG9w0BAQsFADAv
+      MS0wKwYDVQQDEyQ3ZDIwZTk1ZS01MjNjLTQ5NzctOGJkNS1kZmQ1NmNkYTc5NTgw
+      IBcNMjYwNDI5MTk1MDIxWhgPMjA1NjA0MjEyMDUwMjFaMC8xLTArBgNVBAMTJDdk
+      MjBlOTVlLTUyM2MtNDk3Ny04YmQ1LWRmZDU2Y2RhNzk1ODCCAaIwDQYJKoZIhvcN
+      AQEBBQADggGPADCCAYoCggGBALfwgIPS7FUDi//Vyq6xKm+TjFEMIt6i7FTw5kpZ
+      dYSCyHdV7sxYwgPF8DOhemzgqh1Xc0eaGPJg+1bW5w+K16Eif1F0P8+cFqtC1qCF
+      EgRs4sPGLXHU5B/pcrxNefgc4eINnDEY9d+UlI9swzqT5cc0LEIK4PgtB+C44B6p
+      RpSJc2QvcOZNC/c1U02qn+WurNfX+7ulBZ3woqOOloIVjUrZEuPj1mbwB1EQlRrA
+      jdzCWB75hrRxHX+pw4XRzDqrmv6OLTceUDImnsI1u45/n0A9aj+ocdbBJ+EoUQSR
+      aRut+dq6hL1mAWL3lyT6Vjb5jWpuO1bE9zcDcFSPL/W/Ecojc9giwRPtSDahddTc
+      nFLbQeISsw6koOudy9tR82/dTfkqgbGTfJ7UXGZ6ZDYQJZZ2Ci/rB6MTmLurkTvt
+      k1jlOUOsEPE5DIoE66fhle95bRqi5WVRmGiWD3msTuUpE70jxZx0NthTsPXwJkZj
+      GhRJk0Ja9QJWKgkAoayaQZiYdwIDAQABo0IwQDAOBgNVHQ8BAf8EBAMCAgQwDwYD
+      VR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQU0EX5mv0KqKY7TNyaPrs6kChKBnYwDQYJ
+      KoZIhvcNAQELBQADggGBAFf7Wxvn5svLOHfRKJSLImCUW0o4rVqYzM99pf/4vz7L
+      o4wSCJDhVm/RAfvHVQG5oXo88Z/Jzy+eh8LrDOGeq2cHnwSy/1rJhyL7tlSd5ro1
+      Pb3C4KDJvu8NoqIqn0mQVPUgHAwVk9zduGAclbXF5Y+eDnddFgIdc0b9yw/MCAk6
+      zgUA/pCrpWmIDOyRHnzWiflf3+TzkrxOGWf+rrUH7NQFHjazNVqPZuNqmbETWaPC
+      jxvkkkk7X6bPHMWoSF/zi8jjiFanJDlyBIiYBhaZCPIq3dg5uyFqz5hrROBz4m1r
+      HLNzdURIPqXq39IRVAslcUOTRFR3y3TgZk30g3c1DYWcYGU4e2z+kZoYP5EcuF2A
+      rsAbg2qB5yD71UQoNon4IUZx0NbzpB2gh9gSdHv5o630zr7sx1WBqDPNrO2cfzKk
+      LaAad4LTaSxveA6CUtPYyjAl7mPKprWlPYaWN3i//j8Dp+O/XfPG9WY1aKvGgD/t
+      XKjIjGx7Vxcwi3lp4L03tg==
+      -----END CERTIFICATE-----
+  kind: ConfigMap
+  metadata:
+    annotations:
+      kubernetes.io/description: Contains a CA bundle that can be used to verify the
+        kube-apiserver when using internal endpoints such as the internal service
+        IP or kubernetes.default.svc. No other usage is guaranteed across distributions
+        of Kubernetes clusters.
+    creationTimestamp: "2026-04-29T20:55:52Z"
+    name: kube-root-ca.crt
+    namespace: default
+    resourceVersion: "1777496152719615024"
+    uid: b36d5e22-ce52-4f43-82bf-116f16ed0498
+- apiVersion: v1
+  data:
+    ORDER_SERVICE_URL: http://order-service:8080/orders
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: "2026-04-30T01:13:22Z"
+    name: profile-config
+    namespace: default
+    resourceVersion: "1777511602413727013"
+    uid: 6b0bef7d-0b0b-4e38-95d3-13a914687627
+kind: List
+metadata:
+  resourceVersion: ""

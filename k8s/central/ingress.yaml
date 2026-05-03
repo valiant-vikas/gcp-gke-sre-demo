@@ -1,0 +1,60 @@
+apiVersion: v1
+items:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      ingress.kubernetes.io/backends: '{"k8s1-92107bf1-default-profile-service-80-35654ff2":"HEALTHY","k8s1-92107bf1-kube-system-default-http-backend-80-f757501d":"HEALTHY"}'
+      ingress.kubernetes.io/forwarding-rule: k8s2-fr-3sckdnbr-default-profile-ingress-c2tbo11k
+      ingress.kubernetes.io/target-proxy: k8s2-tp-3sckdnbr-default-profile-ingress-c2tbo11k
+      ingress.kubernetes.io/url-map: k8s2-um-3sckdnbr-default-profile-ingress-c2tbo11k
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"kubernetes.io/ingress.class":"gce"},"name":"profile-ingress","namespace":"default"},"spec":{"rules":[{"http":{"paths":[{"backend":{"service":{"name":"profile-service","port":{"number":80}}},"path":"/profiles","pathType":"Prefix"},{"backend":{"service":{"name":"profile-service","port":{"number":80}}},"path":"/health","pathType":"Prefix"},{"backend":{"service":{"name":"profile-service","port":{"number":80}}},"path":"/profile-orders","pathType":"Prefix"},{"backend":{"service":{"name":"profile-service","port":{"number":80}}},"path":"/","pathType":"Prefix"}]}}]}}
+      kubernetes.io/ingress.class: gce
+    creationTimestamp: "2026-05-03T02:38:03Z"
+    finalizers:
+    - networking.gke.io/ingress-finalizer-V2
+    generation: 1
+    name: profile-ingress
+    namespace: default
+    resourceVersion: "1777777057467727016"
+    uid: a32897b7-47b3-46de-8a72-ce3f17090a64
+  spec:
+    rules:
+    - http:
+        paths:
+        - backend:
+            service:
+              name: profile-service
+              port:
+                number: 80
+          path: /profiles
+          pathType: Prefix
+        - backend:
+            service:
+              name: profile-service
+              port:
+                number: 80
+          path: /health
+          pathType: Prefix
+        - backend:
+            service:
+              name: profile-service
+              port:
+                number: 80
+          path: /profile-orders
+          pathType: Prefix
+        - backend:
+            service:
+              name: profile-service
+              port:
+                number: 80
+          path: /
+          pathType: Prefix
+  status:
+    loadBalancer:
+      ingress:
+      - ip: 35.201.85.51
+kind: List
+metadata:
+  resourceVersion: ""

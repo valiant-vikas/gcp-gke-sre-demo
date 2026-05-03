@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"limits":{"ephemeral-storage":"1Gi"},"requests":{"cpu":"5","ephemeral-storage":"1Gi","memory":"2Gi"},"name":"profile-service-sha256-1"}]},"output":{"containers":[{"limits":{"ephemeral-storage":"1Gi"},"requests":{"cpu":"5","ephemeral-storage":"1Gi","memory":"5Gi"},"name":"profile-service-sha256-1"}]},"computeClassAtAdmission":"Default","modified":true}'
+    autopilot.gke.io/warden-version: 35.15.0-gke.1
+    deployment.kubernetes.io/revision: "12"
+  creationTimestamp: "2026-04-29T21:43:56Z"
+  generation: 50
+  labels:
+    app: profile-service
+    app.kubernetes.io/managed-by: cloud-console
+  name: profile-service
+  namespace: default
+  resourceVersion: "1777778797895823020"
+  uid: 897718e3-3473-4c11-a830-f716bf8689ae
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: profile-service
+      app.kubernetes.io/managed-by: cloud-console
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2026-04-30T04:22:09Z"
+      labels:
+        app: profile-service
+        app.kubernetes.io/managed-by: cloud-console
+    spec:
+      containers:
+      - env:
+        - name: ORDER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: ORDER_SERVICE_URL
+              name: profile-config
+        image: us-central1-docker.pkg.dev/gke-sre-demo/app-repo/profile-service:v5
+        imagePullPolicy: IfNotPresent
+        name: profile-service-sha256-1
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            ephemeral-storage: 1Gi
+            memory: 512Mi
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: kubernetes.io/arch
+        operator: Equal
+        value: amd64
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2026-04-29T21:43:56Z"
+    lastUpdateTime: "2026-04-30T04:24:32Z"
+    message: ReplicaSet "profile-service-6db7b7f47d" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2026-05-03T03:21:56Z"
+    lastUpdateTime: "2026-05-03T03:21:56Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 50
+  readyReplicas: 1
+  replicas: 1
+  terminatingReplicas: 0
+  updatedReplicas: 1
