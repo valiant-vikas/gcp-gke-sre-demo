@@ -1,9 +1,16 @@
 name: Build and Deploy to GKE
 
-on:
-  push:
-    branches:
-      - main
+oon:
+  workflow_dispatch:
+    inputs:
+      target_cluster:
+        description: "Select cluster"
+        required: true
+        type: choice
+        options:
+          - central
+          - east
+          - both
 
 permissions:
   contents: read
@@ -80,6 +87,7 @@ jobs:
           sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/central/profile-deployment.yaml
 
       - name: Deploy to central cluster
+        if: ${{ github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'both' }}
         run: |
           gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
           kubectl apply -f k8s/central/configmap.yaml
@@ -92,6 +100,7 @@ jobs:
           kubectl rollout status deployment/profile-service
 
       - name: Update image in east YAML
+        if: ${{ github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'both' }}
         run: |
           sed -i "s|image: .*order-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG|g" k8s/east/order-deployment.yaml
           sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/east/profile-deployment.yaml
