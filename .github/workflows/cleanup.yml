@@ -1,0 +1,86 @@
+name: Cleanup GKE Resources
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_cluster:
+        description: "Select cluster"
+        required: true
+        type: choice
+        options:
+          - central
+          - east
+          - both
+      cleanup_action:
+        description: "Choose cleanup action"
+        required: true
+        type: choice
+        options:
+          - scale-to-zero
+          - delete
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Authenticate to Google Cloud using WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Install GKE auth plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin --quiet
+          echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
+
+      - name: Scale central to zero
+        if: ${{ (github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
+        run: |
+          gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
+          kubectl scale deployment order-service --replicas=0 --ignore-not-found
+          kubectl scale deployment profile-service --replicas=0 --ignore-not-found
+          kubectl get deployments
+          kubectl get pods
+
+      - name: Delete central resources
+        if: ${{ (github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'delete' }}
+        run: |
+          gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
+          kubectl delete ingress profile-ingress --ignore-not-found
+          kubectl delete svc order-service --ignore-not-found
+          kubectl delete svc profile-service --ignore-not-found
+          kubectl delete deployment order-service --ignore-not-found
+          kubectl delete deployment profile-service --ignore-not-found
+          kubectl get all
+
+      - name: Scale east to zero
+        if: ${{ (github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
+        run: |
+          gcloud container clusters get-credentials profile-cluster-east --region us-east1 --project $PROJECT_ID
+          kubectl scale deployment order-service --replicas=0 --ignore-not-found
+          kubectl scale deployment profile-service --replicas=0 --ignore-not-found
+          kubectl get deployments
+          kubectl get pods
+
+      - name: Delete east resources
+        if: ${{ (github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'delete' }}
+        run: |
+          gcloud container clusters get-credentials profile-cluster-east --region us-east1 --project $PROJECT_ID
+          kubectl delete ingress profile-ingress --ignore-not-found
+          kubectl delete svc order-service --ignore-not-found
+          kubectl delete svc profile-service --ignore-not-found
+          kubectl delete deployment order-service --ignore-not-found
+          kubectl delete deployment profile-service --ignore-not-found
+          kubectl get all
