@@ -1,0 +1,126 @@
+name: Terraform Destroy Infra
+
+on:
+  workflow_dispatch:
+    inputs:
+      destroy_target:
+        description: "Select what to destroy"
+        required: true
+        type: choice
+        options:
+          - central-cluster-only
+          - east-cluster-only
+          - west-cluster-only
+          - south-cluster-only
+          - full-infra
+      confirm_destroy:
+        description: "Type DELETE to confirm"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm_destroy }}" != "DELETE" ]; then
+            echo "❌ You must type DELETE to confirm destroy."
+            exit 1
+          fi
+
+      - name: Show destroy warning
+        run: |
+          echo "## ⚠️ Terraform Destroy Warning" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Selected target: **${{ github.event.inputs.destroy_target }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event.inputs.destroy_target }}" = "central-cluster-only" ]; then
+            echo "This will delete:" >> $GITHUB_STEP_SUMMARY
+            echo "- profile-cluster (central)" >> $GITHUB_STEP_SUMMARY
+
+          elif [ "${{ github.event.inputs.destroy_target }}" = "east-cluster-only" ]; then
+            echo "This will delete:" >> $GITHUB_STEP_SUMMARY
+            echo "- profile-cluster-east" >> $GITHUB_STEP_SUMMARY
+
+          elif [ "${{ github.event.inputs.destroy_target }}" = "west-cluster-only" ]; then
+            echo "This will delete:" >> $GITHUB_STEP_SUMMARY
+            echo "- profile-cluster-west" >> $GITHUB_STEP_SUMMARY
+
+          elif [ "${{ github.event.inputs.destroy_target }}" = "south-cluster-only" ]; then
+            echo "This will delete:" >> $GITHUB_STEP_SUMMARY
+            echo "- profile-cluster-south" >> $GITHUB_STEP_SUMMARY
+
+          else
+            echo "This will delete EVERYTHING managed by Terraform:" >> $GITHUB_STEP_SUMMARY
+            echo "- All clusters (central, east, west, south)" >> $GITHUB_STEP_SUMMARY
+            echo "- VPC (sre-demo-vpc)" >> $GITHUB_STEP_SUMMARY
+            echo "- Cloud NAT & Routers" >> $GITHUB_STEP_SUMMARY
+            echo "- Firewall rules" >> $GITHUB_STEP_SUMMARY
+            echo "- Private Service Access" >> $GITHUB_STEP_SUMMARY
+            echo "- IAM/WIF resources" >> $GITHUB_STEP_SUMMARY
+            echo "- Artifact Registry" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP using WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init
+        run: terraform init
+
+      # -------- Cluster Specific Destroy --------
+
+      - name: Destroy central cluster only
+        if: ${{ github.event.inputs.destroy_target == 'central-cluster-only' }}
+        run: |
+          terraform destroy -auto-approve \
+            -target=google_container_cluster.central
+
+      - name: Destroy east cluster only
+        if: ${{ github.event.inputs.destroy_target == 'east-cluster-only' }}
+        run: |
+          terraform destroy -auto-approve \
+            -target=google_container_cluster.east
+
+      - name: Destroy west cluster only
+        if: ${{ github.event.inputs.destroy_target == 'west-cluster-only' }}
+        run: |
+          terraform destroy -auto-approve \
+            -target=google_container_cluster.west
+
+      - name: Destroy south cluster only
+        if: ${{ github.event.inputs.destroy_target == 'south-cluster-only' }}
+        run: |
+          terraform destroy -auto-approve \
+            -target=google_container_cluster.south
+
+      # -------- Full Infra Destroy --------
+
+      - name: Destroy full infrastructure
+        if: ${{ github.event.inputs.destroy_target == 'full-infra' }}
+        run: |
+          terraform destroy -auto-approve

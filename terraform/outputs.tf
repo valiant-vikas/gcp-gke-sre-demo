@@ -22,9 +22,9 @@ output "west_cluster" {
   value = google_container_cluster.west.name
 }
 
-output "south_cluster" {
-  value = google_container_cluster.south.name
-}
+# output "south_cluster" {
+#   value = google_container_cluster.south.name
+# }
 
 output "sre_vpc_name" {
   value = google_compute_network.sre_vpc.name
