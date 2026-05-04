@@ -23,6 +23,7 @@
 hs_err_pid*
 replay_pid*
 
+echo "PAT.txt" >> .gitignore
 
 # IntelliJ
 .idea/
@@ -32,3 +33,9 @@ gcloud
 
 # OS files
 .DS_Store
+
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+*.tfplan

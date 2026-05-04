@@ -20,7 +20,15 @@ variable "artifact_repo" {
   type    = string
   default = "app-repo"
 }
+variable "west_region" {
+  type    = string
+  default = "us-west1"
+}
 
+variable "south_region" {
+  type    = string
+  default = "us-south1"
+}
 variable "github_repo" {
   type    = string
   default = "valiant-vikas/gcp-gke-sre-demo"
