@@ -1,21 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    autopilot.gke.io/resource-adjustment: '{"input":{"containers":[{"name":"order-service-sha256-1"}]},"output":{"containers":[{"limits":{"ephemeral-storage":"1Gi"},"requests":{"cpu":"500m","ephemeral-storage":"1Gi","memory":"2Gi"},"name":"order-service-sha256-1"}]},"computeClassAtAdmission":"Default","modified":true}'
-    autopilot.gke.io/warden-version: 35.15.0-gke.1
-    deployment.kubernetes.io/revision: "2"
-    kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"autopilot.gke.io/resource-adjustment":"{\"input\":{\"containers\":[{\"name\":\"order-service-sha256-1\"}]},\"output\":{\"containers\":[{\"limits\":{\"ephemeral-storage\":\"1Gi\"},\"requests\":{\"cpu\":\"500m\",\"ephemeral-storage\":\"1Gi\",\"memory\":\"2Gi\"},\"name\":\"order-service-sha256-1\"}]},\"computeClassAtAdmission\":\"Default\",\"modified\":true}","autopilot.gke.io/warden-version":"35.15.0-gke.1","deployment.kubernetes.io/revision":"1"},"creationTimestamp":"2026-04-30T05:20:18Z","generation":26,"labels":{"app":"order-service","app.kubernetes.io/managed-by":"cloud-console"},"name":"order-service","namespace":"default","resourceVersion":"1777775750473519008","uid":"7b34d9ab-7df5-45ba-a90f-e1f793c9cec2"},"spec":{"progressDeadlineSeconds":600,"replicas":1,"revisionHistoryLimit":10,"selector":{"matchLabels":{"app":"order-service","app.kubernetes.io/managed-by":"cloud-console"}},"strategy":{"rollingUpdate":{"maxSurge":"25%","maxUnavailable":"25%"},"type":"RollingUpdate"},"template":{"metadata":{"labels":{"app":"order-service","app.kubernetes.io/managed-by":"cloud-console"}},"spec":{"containers":[{"image":"us-central1-docker.pkg.dev/gke-sre-demo/app-repo/order-service@sha256:3f2503e195f7499c34a874627d8270e25ca8aecc938f353fc66d1bc2c609b3ab","imagePullPolicy":"IfNotPresent","name":"order-service-sha256-1","resources":{"limits":{"cpu":"500m","ephemeral-storage":"1Gi","memory":"512Mi"},"requests":{"cpu":"100m","ephemeral-storage":"1Gi","memory":"256Mi"}},"securityContext":{"capabilities":{"drop":["NET_RAW"]}},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{"seccompProfile":{"type":"RuntimeDefault"}},"terminationGracePeriodSeconds":30,"tolerations":[{"effect":"NoSchedule","key":"kubernetes.io/arch","operator":"Equal","value":"amd64"}]}}},"status":{"availableReplicas":1,"conditions":[{"lastTransitionTime":"2026-04-30T05:20:18Z","lastUpdateTime":"2026-04-30T05:26:03Z","message":"ReplicaSet \"order-service-5879964df4\" has successfully progressed.","reason":"NewReplicaSetAvailable","status":"True","type":"Progressing"},{"lastTransitionTime":"2026-05-03T02:35:50Z","lastUpdateTime":"2026-05-03T02:35:50Z","message":"Deployment has minimum availability.","reason":"MinimumReplicasAvailable","status":"True","type":"Available"}],"observedGeneration":26,"readyReplicas":1,"replicas":1,"terminatingReplicas":0,"updatedReplicas":1}}
-  creationTimestamp: "2026-04-30T05:20:18Z"
-  generation: 30
   labels:
     app: order-service
-    app.kubernetes.io/managed-by: cloud-console
   name: order-service
   namespace: default
-  resourceVersion: "1777792424584207008"
-  uid: 7b34d9ab-7df5-45ba-a90f-e1f793c9cec2
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -66,23 +55,3 @@ spec:
         key: kubernetes.io/arch
         operator: Equal
         value: amd64
-status:
-  availableReplicas: 1
-  conditions:
-  - lastTransitionTime: "2026-04-30T05:20:18Z"
-    lastUpdateTime: "2026-05-03T07:07:17Z"
-    message: ReplicaSet "order-service-66b6cd8967" has successfully progressed.
-    reason: NewReplicaSetAvailable
-    status: "True"
-    type: Progressing
-  - lastTransitionTime: "2026-05-03T07:07:27Z"
-    lastUpdateTime: "2026-05-03T07:07:27Z"
-    message: Deployment has minimum availability.
-    reason: MinimumReplicasAvailable
-    status: "True"
-    type: Available
-  observedGeneration: 30
-  readyReplicas: 1
-  replicas: 1
-  terminatingReplicas: 0
-  updatedReplicas: 1

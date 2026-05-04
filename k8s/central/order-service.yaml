@@ -1,32 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    cloud.google.com/neg: '{"ingress":true}'
-  creationTimestamp: "2026-04-30T00:02:23Z"
-  labels:
-    app: order-service
-    app.kubernetes.io/managed-by: cloud-console
   name: order-service
   namespace: default
-  resourceVersion: "1777509232690015019"
-  uid: f8d0e9c3-f3f9-4b9b-9ab9-3f4dd64918b0
+  labels:
+    app: order-service
 spec:
-  clusterIP: 34.118.231.249
-  clusterIPs:
-  - 34.118.231.249
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
-  ports:
-  - port: 8080
-    protocol: TCP
-    targetPort: 8080
+  type: ClusterIP
   selector:
     app: order-service
-    app.kubernetes.io/managed-by: cloud-console
-  sessionAffinity: None
-  type: ClusterIP
-status:
-  loadBalancer: {}
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
