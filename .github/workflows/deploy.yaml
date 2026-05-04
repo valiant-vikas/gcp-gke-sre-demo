@@ -87,7 +87,7 @@ jobs:
           kubectl apply -f k8s/central/order-service.yaml
           kubectl apply -f k8s/central/profile-deployment.yaml
           kubectl apply -f k8s/central/profile-service.yaml
-        # kubectl apply -f k8s/central/ingress.yaml
+          # kubectl apply -f k8s/central/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
 
@@ -104,6 +104,6 @@ jobs:
           kubectl apply -f k8s/east/order-service.yaml
           kubectl apply -f k8s/east/profile-deployment.yaml
           kubectl apply -f k8s/east/profile-service.yaml
-     #    kubectl apply -f k8s/central/ingress.yaml
+          # kubectl apply -f k8s/central/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
