@@ -10,7 +10,9 @@ on:
         options:
           - central
           - east
-          - both
+          - west
+          - south
+          - all
       cleanup_action:
         description: "Choose cleanup action"
         required: true
@@ -46,41 +48,99 @@ jobs:
           echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
 
       - name: Scale central to zero
-        if: ${{ (github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
+        if: ${{ (github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
         run: |
-          gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
+          gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_IDd
+          kubectl delete hpa profile-service-hpa --ignore-not-found
+          kubectl delete hpa order-service-hpa --ignore-not-found
           kubectl scale deployment order-service --replicas=0 --ignore-not-found
           kubectl scale deployment profile-service --replicas=0 --ignore-not-found
           kubectl get deployments
           kubectl get pods
 
       - name: Delete central resources
-        if: ${{ (github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'delete' }}
+        if: ${{ (github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'delete' }}
         run: |
           gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
           kubectl delete ingress profile-ingress --ignore-not-found
           kubectl delete svc order-service --ignore-not-found
+          kubectl delete hpa profile-service-hpa --ignore-not-found
+          kubectl delete hpa order-service-hpa --ignore-not-found
           kubectl delete svc profile-service --ignore-not-found
           kubectl delete deployment order-service --ignore-not-found
           kubectl delete deployment profile-service --ignore-not-found
           kubectl get all
 
       - name: Scale east to zero
-        if: ${{ (github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
+        if: ${{ (github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
         run: |
           gcloud container clusters get-credentials profile-cluster-east --region us-east1 --project $PROJECT_ID
+          kubectl delete hpa profile-service-hpa --ignore-not-found
+          kubectl delete hpa order-service-hpa --ignore-not-found
           kubectl scale deployment order-service --replicas=0 --ignore-not-found
           kubectl scale deployment profile-service --replicas=0 --ignore-not-found
           kubectl get deployments
           kubectl get pods
 
       - name: Delete east resources
-        if: ${{ (github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'both') && github.event.inputs.cleanup_action == 'delete' }}
+        if: ${{ (github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'delete' }}
         run: |
           gcloud container clusters get-credentials profile-cluster-east --region us-east1 --project $PROJECT_ID
+          kubectl delete hpa profile-service-hpa --ignore-not-found
+          kubectl delete hpa order-service-hpa --ignore-not-found
           kubectl delete ingress profile-ingress --ignore-not-found
           kubectl delete svc order-service --ignore-not-found
           kubectl delete svc profile-service --ignore-not-found
           kubectl delete deployment order-service --ignore-not-found
           kubectl delete deployment profile-service --ignore-not-found
           kubectl get all
+
+
+
+    - name: Scale west to zero
+      if: ${{ (github.event.inputs.target_cluster == 'west' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
+      run: |
+        gcloud container clusters get-credentials profile-cluster-west --region us-west1 --project $PROJECT_ID
+        kubectl delete hpa profile-service-hpa --ignore-not-found
+        kubectl delete hpa order-service-hpa --ignore-not-found
+        kubectl scale deployment order-service --replicas=0 --ignore-not-found
+        kubectl scale deployment profile-service --replicas=0 --ignore-not-found
+        kubectl get deployments
+        kubectl get pods
+
+    - name: Delete west resources
+      if: ${{ (github.event.inputs.target_cluster == 'west' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'delete' }}
+      run: |
+        gcloud container clusters get-credentials profile-cluster-west --region us-west1 --project $PROJECT_ID
+        kubectl delete hpa profile-service-hpa --ignore-not-found
+        kubectl delete hpa order-service-hpa --ignore-not-found
+        kubectl delete ingress profile-ingress --ignore-not-found
+        kubectl delete svc order-service --ignore-not-found
+        kubectl delete svc profile-service --ignore-not-found
+        kubectl delete deployment order-service --ignore-not-found
+        kubectl delete deployment profile-service --ignore-not-found
+        kubectl get all
+
+    - name: Scale south to zero
+      if: ${{ (github.event.inputs.target_cluster == 'south' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'scale-to-zero' }}
+      run: |
+        gcloud container clusters get-credentials profile-cluster-south --region us-south1 --project $PROJECT_ID
+        kubectl delete hpa profile-service-hpa --ignore-not-found
+        kubectl delete hpa order-service-hpa --ignore-not-found
+        kubectl scale deployment order-service --replicas=0 --ignore-not-found
+        kubectl scale deployment profile-service --replicas=0 --ignore-not-found
+        kubectl get deployments
+        kubectl get pods
+
+    - name: Delete south resources
+      if: ${{ (github.event.inputs.target_cluster == 'south' || github.event.inputs.target_cluster == 'all') && github.event.inputs.cleanup_action == 'delete' }}
+      run: |
+        gcloud container clusters get-credentials profile-cluster-south --region us-south1 --project $PROJECT_ID
+        kubectl delete hpa profile-service-hpa --ignore-not-found
+        kubectl delete hpa order-service-hpa --ignore-not-found
+        kubectl delete ingress profile-ingress --ignore-not-found
+        kubectl delete svc order-service --ignore-not-found
+        kubectl delete svc profile-service --ignore-not-found
+        kubectl delete deployment order-service --ignore-not-found
+        kubectl delete deployment profile-service --ignore-not-found
+        kubectl get all

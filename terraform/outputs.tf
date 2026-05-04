@@ -17,3 +17,15 @@ output "github_service_account" {
 output "workload_identity_provider" {
   value = "projects/${var.project_number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.github_pool.workload_identity_pool_id}/providers/${google_iam_workload_identity_pool_provider.github_provider.workload_identity_pool_provider_id}"
 }
+
+output "west_cluster" {
+  value = google_container_cluster.west.name
+}
+
+output "south_cluster" {
+  value = google_container_cluster.south.name
+}
+
+output "sre_vpc_name" {
+  value = google_compute_network.sre_vpc.name
+}

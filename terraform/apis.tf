@@ -6,7 +6,9 @@ resource "google_project_service" "required_apis" {
     "cloudresourcemanager.googleapis.com",
     "compute.googleapis.com",
     "logging.googleapis.com",
-    "monitoring.googleapis.com"
+    "monitoring.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "dns.googleapis.com",
   ])
 
   project = var.project_id
