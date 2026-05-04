@@ -1,6 +1,6 @@
 name: Build and Deploy to GKE
 
-oon:
+on:
   workflow_dispatch:
     inputs:
       target_cluster:
