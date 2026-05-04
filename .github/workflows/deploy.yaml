@@ -1,0 +1,84 @@
+name: Build and Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  ARTIFACT_REPO: app-repo
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud using WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build order-service image
+        run: |
+          docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG ./order-service
+
+      - name: Push order-service image
+        run: |
+          docker push us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG
+
+      - name: Build profile-service image
+        run: |
+          docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG ./profile-service
+
+      - name: Push profile-service image
+        run: |
+          docker push us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG
+
+      - name: Update image in central YAML
+        run: |
+          sed -i "s|image: .*order-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG|g" k8s/central/order-deployment.yaml
+          sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/central/profile-deployment.yaml
+
+      - name: Deploy to central cluster
+        run: |
+          gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
+          kubectl apply -f k8s/central/configmap.yaml
+          kubectl apply -f k8s/central/order-deployment.yaml
+          kubectl apply -f k8s/central/order-service.yaml
+          kubectl apply -f k8s/central/profile-deployment.yaml
+          kubectl apply -f k8s/central/profile-service.yaml
+          kubectl rollout status deployment/order-service
+          kubectl rollout status deployment/profile-service
+
+      - name: Update image in east YAML
+        run: |
+          sed -i "s|image: .*order-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG|g" k8s/east/order-deployment.yaml
+          sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/east/profile-deployment.yaml
+
+      - name: Deploy to east cluster
+        run: |
+          gcloud container clusters get-credentials profile-cluster-east --region us-east1 --project $PROJECT_ID
+          kubectl apply -f k8s/east/configmap.yaml
+          kubectl apply -f k8s/east/order-deployment.yaml
+          kubectl apply -f k8s/east/order-service.yaml
+          kubectl apply -f k8s/east/profile-deployment.yaml
+          kubectl apply -f k8s/east/profile-service.yaml
+          kubectl rollout status deployment/order-service
+          kubectl rollout status deployment/profile-service
