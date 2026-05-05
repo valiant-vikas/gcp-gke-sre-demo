@@ -5,12 +5,14 @@ metadata:
   namespace: default
   labels:
     app: profile-service
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
 spec:
   type: ClusterIP
   selector:
     app: profile-service
   ports:
     - name: http
-      port: 8080
+      port: 80
       targetPort: 8080
       protocol: TCP
