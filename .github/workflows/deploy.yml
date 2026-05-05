@@ -4,15 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       target_cluster:
-        description: "Select cluster"
+        description: "Enter clusters: central,east,west,south or all"
         required: true
-        type: choice
-        options:
-          - central
-          - east
-          - west
-          - south
-          - all
+        default: "central"
+        type: string
 
 permissions:
   contents: read
@@ -28,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Authenticate to Google Cloud using WIF
@@ -45,122 +40,108 @@ jobs:
           gcloud components install gke-gcloud-auth-plugin --quiet
           echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
 
-      - name: Configure Docker
-        run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
-
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
-      - name: Build order-service jar
+      - name: Build order-service
         run: |
           cd order-service
-          chmod +x mvnw
-          ./mvnw clean package -DskipTests
+          mvn clean package -DskipTests
 
-      - name: Build profile-service jar
+      - name: Build profile-service
         run: |
           cd profile-service
-          chmod +x mvnw
-          ./mvnw clean package -DskipTests
+          mvn clean package -DskipTests
 
-      - name: Build order-service image
+      - name: Configure Docker auth
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build and push order-service image
         run: |
           docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG ./order-service
-
-      - name: Push order-service image
-        run: |
           docker push us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG
 
-      - name: Build profile-service image
+      - name: Build and push profile-service image
         run: |
           docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG ./profile-service
-
-      - name: Push profile-service image
-        run: |
           docker push us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG
 
-      - name: Update image in central YAML
+      - name: Deploy to central cluster
+        if: ${{ contains(github.event.inputs.target_cluster, 'central') || github.event.inputs.target_cluster == 'all' }}
         run: |
           sed -i "s|image: .*order-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG|g" k8s/central/order-deployment.yaml
           sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/central/profile-deployment.yaml
 
-      - name: Deploy to central cluster
-        if: ${{ github.event.inputs.target_cluster == 'central' || github.event.inputs.target_cluster == 'all' }}
-        run: |
           gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
+
           kubectl apply -f k8s/central/configmap.yaml
           kubectl apply -f k8s/central/order-deployment.yaml
           kubectl apply -f k8s/central/order-service.yaml
-          kubectl apply -f k8s/central/order-hpa.yaml
-          kubectl apply -f k8s/central/profile-hpa.yaml
           kubectl apply -f k8s/central/profile-deployment.yaml
           kubectl apply -f k8s/central/profile-service.yaml
+          kubectl apply -f k8s/central/order-hpa.yaml
+          kubectl apply -f k8s/central/profile-hpa.yaml
           # kubectl apply -f k8s/central/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
 
-      - name: Update image in east YAML
-        if: ${{ github.event.inputs.target_cluster == 'east' || github.event.inputs.target_cluster == 'all' }}
+      - name: Deploy to east cluster
+        if: ${{ contains(github.event.inputs.target_cluster, 'east') || github.event.inputs.target_cluster == 'all' }}
         run: |
           sed -i "s|image: .*order-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG|g" k8s/east/order-deployment.yaml
           sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/east/profile-deployment.yaml
 
-      - name: Deploy to east cluster
-        run: |
           gcloud container clusters get-credentials profile-cluster-east --region us-east1 --project $PROJECT_ID
+
           kubectl apply -f k8s/east/configmap.yaml
           kubectl apply -f k8s/east/order-deployment.yaml
           kubectl apply -f k8s/east/order-service.yaml
           kubectl apply -f k8s/east/profile-deployment.yaml
+          kubectl apply -f k8s/east/profile-service.yaml
           kubectl apply -f k8s/east/order-hpa.yaml
           kubectl apply -f k8s/east/profile-hpa.yaml
-          kubectl apply -f k8s/east/profile-service.yaml
-          # kubectl apply -f k8s/central/ingress.yaml
+          # kubectl apply -f k8s/east/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
 
-      - name: Update image in west YAML
-        if: ${{ github.event.inputs.target_cluster == 'west' || github.event.inputs.target_cluster == 'all' }}
+      - name: Deploy to west cluster
+        if: ${{ contains(github.event.inputs.target_cluster, 'west') || github.event.inputs.target_cluster == 'all' }}
         run: |
           sed -i "s|image: .*order-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG|g" k8s/west/order-deployment.yaml
           sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/west/profile-deployment.yaml
 
-      - name: Deploy to west cluster
-        if: ${{ github.event.inputs.target_cluster == 'west' || github.event.inputs.target_cluster == 'all' }}
-        run: |
           gcloud container clusters get-credentials profile-cluster-west --region us-west1 --project $PROJECT_ID
+
           kubectl apply -f k8s/west/configmap.yaml
           kubectl apply -f k8s/west/order-deployment.yaml
           kubectl apply -f k8s/west/order-service.yaml
           kubectl apply -f k8s/west/profile-deployment.yaml
           kubectl apply -f k8s/west/profile-service.yaml
-          kubectl apply -f k8s/west/profile-hpa.yaml
           kubectl apply -f k8s/west/order-hpa.yaml
+          kubectl apply -f k8s/west/profile-hpa.yaml
           # kubectl apply -f k8s/west/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
 
-      - name: Update image in south YAML
-        if: ${{ github.event.inputs.target_cluster == 'south' || github.event.inputs.target_cluster == 'all' }}
+      - name: Deploy to south cluster
+        if: ${{ contains(github.event.inputs.target_cluster, 'south') || github.event.inputs.target_cluster == 'all' }}
         run: |
           sed -i "s|image: .*order-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/order-service:$IMAGE_TAG|g" k8s/south/order-deployment.yaml
           sed -i "s|image: .*profile-service.*|image: us-central1-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/profile-service:$IMAGE_TAG|g" k8s/south/profile-deployment.yaml
 
-      - name: Deploy to south cluster
-        if: ${{ github.event.inputs.target_cluster == 'south' || github.event.inputs.target_cluster == 'all' }}
-        run: |
           gcloud container clusters get-credentials profile-cluster-south --region us-south1 --project $PROJECT_ID
+
           kubectl apply -f k8s/south/configmap.yaml
           kubectl apply -f k8s/south/order-deployment.yaml
           kubectl apply -f k8s/south/order-service.yaml
           kubectl apply -f k8s/south/profile-deployment.yaml
           kubectl apply -f k8s/south/profile-service.yaml
+          kubectl apply -f k8s/south/order-hpa.yaml
           kubectl apply -f k8s/south/profile-hpa.yaml
           # kubectl apply -f k8s/south/ingress.yaml
-          kubectl apply -f k8s/south/order-hpa.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
