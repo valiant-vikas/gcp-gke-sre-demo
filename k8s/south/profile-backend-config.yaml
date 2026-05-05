@@ -6,5 +6,5 @@ metadata:
 spec:
   healthCheck:
     type: HTTP
-    requestPath: /health
+    requestPath: /actuator/health
     port: 8080
