@@ -1,0 +1,10 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: profile-backend-config
+  namespace: default
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /health
+    port: 8080
