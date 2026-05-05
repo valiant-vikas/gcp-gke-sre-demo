@@ -20,6 +20,8 @@ spec:
     type: RollingUpdate
   template:
     metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2026-04-30T04:22:09Z"
       labels:
         app: profile-service
         app.kubernetes.io/managed-by: cloud-console
