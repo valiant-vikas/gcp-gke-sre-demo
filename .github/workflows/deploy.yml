@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       target_cluster:
-        description: "Enter clusters: central,east,west,south or all"
+        description: "Enter cluster: central, east, west, south or all"
         required: true
         default: "central"
         type: string
@@ -40,15 +40,13 @@ jobs:
           gcloud components install gke-gcloud-auth-plugin --quiet
           echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
 
-      - name: Show selected clusters
+      - name: Show selected cluster
         run: |
           echo "=============================="
-          echo "Selected clusters for deploy:"
-          echo "Central: ${{ github.event.inputs.deploy_central }}"
-          echo "East:    ${{ github.event.inputs.deploy_east }}"
-          echo "West:    ${{ github.event.inputs.deploy_west }}"
-          echo "South:   ${{ github.event.inputs.deploy_south }}"
+          echo "Selected target cluster: ${{ github.event.inputs.target_cluster }}"
+          echo "Image tag: $IMAGE_TAG"
           echo "=============================="
+
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
@@ -88,16 +86,24 @@ jobs:
           gcloud container clusters get-credentials profile-cluster --region us-central1 --project $PROJECT_ID
 
           kubectl apply -f k8s/central/configmap.yaml
-          kubectl apply -f k8s/central/order-deployment.yaml
-          kubectl apply -f k8s/central/order-service.yaml
-          kubectl apply -f k8s/central/profile-deployment.yaml
-          kubectl apply -f k8s/central/profile-service.yaml
-          kubectl apply -f k8s/central/order-hpa.yaml
           kubectl apply -f k8s/central/profile-backend-config.yaml
+
+          # Uncomment only after app-secret.yaml exists
+          # kubectl apply -f k8s/central/app-secret.yaml
+
+          kubectl apply -f k8s/central/order-service.yaml
+          kubectl apply -f k8s/central/profile-service.yaml
+
+          kubectl apply -f k8s/central/order-deployment.yaml
+          kubectl apply -f k8s/central/profile-deployment.yaml
+
+          kubectl apply -f k8s/central/order-hpa.yaml
           kubectl apply -f k8s/central/profile-hpa.yaml
+
           kubectl apply -f k8s/central/ingress.yaml
-          kubectl rollout status deployment/order-service
-          kubectl rollout status deployment/profile-service
+
+          kubectl rollout status deployment/order-service --timeout=10m
+          kubectl rollout status deployment/profile-service --timeout=10m
 
       - name: Deploy to east cluster
         if: ${{ contains(github.event.inputs.target_cluster, 'east') || github.event.inputs.target_cluster == 'all' }}
@@ -108,16 +114,24 @@ jobs:
           gcloud container clusters get-credentials profile-cluster-east --region us-east1 --project $PROJECT_ID
 
           kubectl apply -f k8s/east/configmap.yaml
-          kubectl apply -f k8s/east/order-deployment.yaml
+          kubectl apply -f k8s/east/profile-backend-config.yaml
+
+          # Uncomment only after app-secret.yaml exists
+          # kubectl apply -f k8s/east/app-secret.yaml
+
           kubectl apply -f k8s/east/order-service.yaml
-          kubectl apply -f k8s/east/profile-deployment.yaml
           kubectl apply -f k8s/east/profile-service.yaml
+
+          kubectl apply -f k8s/east/order-deployment.yaml
+          kubectl apply -f k8s/east/profile-deployment.yaml
+
           kubectl apply -f k8s/east/order-hpa.yaml
           kubectl apply -f k8s/east/profile-hpa.yaml
-          kubectl apply -f k8s/east/profile-backend-config.yaml
+
           kubectl apply -f k8s/east/ingress.yaml
-          kubectl rollout status deployment/order-service
-          kubectl rollout status deployment/profile-service
+
+          kubectl rollout status deployment/order-service --timeout=10m
+          kubectl rollout status deployment/profile-service --timeout=10m
 
       - name: Deploy to west cluster
         if: ${{ contains(github.event.inputs.target_cluster, 'west') || github.event.inputs.target_cluster == 'all' }}
@@ -128,16 +142,24 @@ jobs:
           gcloud container clusters get-credentials profile-cluster-west --region us-west1 --project $PROJECT_ID
 
           kubectl apply -f k8s/west/configmap.yaml
-          kubectl apply -f k8s/west/order-deployment.yaml
-          kubectl apply -f k8s/west/order-service.yaml
-          kubectl apply -f k8s/west/profile-deployment.yaml
-          kubectl apply -f k8s/west/profile-service.yaml
-          kubectl apply -f k8s/west/order-hpa.yaml
           kubectl apply -f k8s/west/profile-backend-config.yaml
+
+          # Uncomment only after app-secret.yaml exists
+          # kubectl apply -f k8s/west/app-secret.yaml
+
+          kubectl apply -f k8s/west/order-service.yaml
+          kubectl apply -f k8s/west/profile-service.yaml
+
+          kubectl apply -f k8s/west/order-deployment.yaml
+          kubectl apply -f k8s/west/profile-deployment.yaml
+
+          kubectl apply -f k8s/west/order-hpa.yaml
           kubectl apply -f k8s/west/profile-hpa.yaml
+
           kubectl apply -f k8s/west/ingress.yaml
-          kubectl rollout status deployment/order-service
-          kubectl rollout status deployment/profile-service
+
+          kubectl rollout status deployment/order-service --timeout=10m
+          kubectl rollout status deployment/profile-service --timeout=10m
 
       - name: Deploy to south cluster
         if: ${{ contains(github.event.inputs.target_cluster, 'south') || github.event.inputs.target_cluster == 'all' }}
@@ -148,13 +170,21 @@ jobs:
           gcloud container clusters get-credentials profile-cluster-south --region us-south1 --project $PROJECT_ID
 
           kubectl apply -f k8s/south/configmap.yaml
-          kubectl apply -f k8s/south/order-deployment.yaml
-          kubectl apply -f k8s/south/order-service.yaml
-          kubectl apply -f k8s/south/profile-deployment.yaml
-          kubectl apply -f k8s/south/profile-service.yaml
-          kubectl apply -f k8s/south/order-hpa.yaml
           kubectl apply -f k8s/south/profile-backend-config.yaml
+
+          # Uncomment only after app-secret.yaml exists
+          # kubectl apply -f k8s/south/app-secret.yaml
+
+          kubectl apply -f k8s/south/order-service.yaml
+          kubectl apply -f k8s/south/profile-service.yaml
+
+          kubectl apply -f k8s/south/order-deployment.yaml
+          kubectl apply -f k8s/south/profile-deployment.yaml
+
+          kubectl apply -f k8s/south/order-hpa.yaml
           kubectl apply -f k8s/south/profile-hpa.yaml
+
           kubectl apply -f k8s/south/ingress.yaml
-          kubectl rollout status deployment/order-service
-          kubectl rollout status deployment/profile-service
+
+          kubectl rollout status deployment/order-service --timeout=10m
+          kubectl rollout status deployment/profile-service --timeout=10m

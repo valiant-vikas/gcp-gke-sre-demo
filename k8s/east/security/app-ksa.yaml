@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-ksa
+  namespace: default
+  annotations:
+    iam.gke.io/gcp-service-account: gke-app-runtime-sa@gke-sre-demo.iam.gserviceaccount.com

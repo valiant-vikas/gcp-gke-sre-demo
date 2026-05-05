@@ -16,6 +16,21 @@ variable "dr_region" {
   default = "us-east1"
 }
 
+variable "namespace" {
+  type    = string
+  default = "default"
+}
+
+variable "ksa_name" {
+  type    = string
+  default = "app-ksa"
+}
+
+variable "demo_secret_value" {
+  type      = string
+  sensitive = true
+}
+
 variable "artifact_repo" {
   type    = string
   default = "app-repo"
