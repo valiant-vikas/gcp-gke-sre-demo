@@ -40,6 +40,15 @@ jobs:
           gcloud components install gke-gcloud-auth-plugin --quiet
           echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
 
+      - name: Show selected clusters
+        run: |
+          echo "=============================="
+          echo "Selected clusters for deploy:"
+          echo "Central: ${{ github.event.inputs.deploy_central }}"
+          echo "East:    ${{ github.event.inputs.deploy_east }}"
+          echo "West:    ${{ github.event.inputs.deploy_west }}"
+          echo "South:   ${{ github.event.inputs.deploy_south }}"
+          echo "=============================="
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
@@ -142,6 +151,7 @@ jobs:
           kubectl apply -f k8s/south/profile-service.yaml
           kubectl apply -f k8s/south/order-hpa.yaml
           kubectl apply -f k8s/south/profile-hpa.yaml
-          # kubectl apply -f k8s/south/ingress.yaml
+          # kubectl apply -f k8s/south
+          /ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
