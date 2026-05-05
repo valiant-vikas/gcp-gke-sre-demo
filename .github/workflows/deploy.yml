@@ -94,7 +94,7 @@ jobs:
           kubectl apply -f k8s/central/profile-service.yaml
           kubectl apply -f k8s/central/order-hpa.yaml
           kubectl apply -f k8s/central/profile-hpa.yaml
-          # kubectl apply -f k8s/central/ingress.yaml
+          kubectl apply -f k8s/central/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
 
@@ -113,7 +113,7 @@ jobs:
           kubectl apply -f k8s/east/profile-service.yaml
           kubectl apply -f k8s/east/order-hpa.yaml
           kubectl apply -f k8s/east/profile-hpa.yaml
-          # kubectl apply -f k8s/east/ingress.yaml
+          kubectl apply -f k8s/east/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
 
@@ -132,7 +132,7 @@ jobs:
           kubectl apply -f k8s/west/profile-service.yaml
           kubectl apply -f k8s/west/order-hpa.yaml
           kubectl apply -f k8s/west/profile-hpa.yaml
-          # kubectl apply -f k8s/west/ingress.yaml
+          kubectl apply -f k8s/west/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
 
@@ -151,7 +151,6 @@ jobs:
           kubectl apply -f k8s/south/profile-service.yaml
           kubectl apply -f k8s/south/order-hpa.yaml
           kubectl apply -f k8s/south/profile-hpa.yaml
-          # kubectl apply -f k8s/south
-          /ingress.yaml
+          kubectl apply -f k8s/south/ingress.yaml
           kubectl rollout status deployment/order-service
           kubectl rollout status deployment/profile-service
