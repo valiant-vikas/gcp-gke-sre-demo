@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: profile-config2
+  name: profile-config
   namespace: default
 
 data:
