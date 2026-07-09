@@ -5,8 +5,7 @@ metadata:
   namespace: default
   annotations:
     kubernetes.io/ingress.class: gce
-    kubernetes.io/ingress.global-static-ip-name: kavi-solutions-ip
-    networking.gke.io/managed-certificates: kavi-solutions-cert
+    kubernetes.io/ingress.global-static-ip-name: kavi-solutions-central-ip
 
 spec:
   rules:
